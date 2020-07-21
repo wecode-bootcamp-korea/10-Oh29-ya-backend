@@ -1,10 +1,10 @@
 from django.db import models
-from account.models import User
+#from account.models import User
 
 class Staff(models.Model):
     name     = models.CharField(max_length = 100)
-    logo     = models.ImageField(max_length = 500)
-    official = models.BooleanField()
+    logo     = models.URLField(max_length = 2000)
+    official = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'staff'
@@ -14,10 +14,10 @@ class Staff(models.Model):
 
 class Post(models.Model):
     content       = models.TextField()
-    thumbnail_img = models.URLField(max_length = 500)
-    modal_video   = models.CharField(max_length = 1500)
+    thumbnail_img = models.URLField(max_length = 2000)
+    modal_video   = models.URLField(max_length = 2000, null = True)
     staff         = models.ForeignKey(Staff, on_delete = models.CASCADE)
-    user          = models.ManyToManyField(User, through = 'PostLike')
+    #user          = models.ManyToManyField(User, through = 'PostLike')
 
     class Meta:
         db_table = 'posts'
@@ -25,12 +25,14 @@ class Post(models.Model):
     def __str__(self):
         return self.content
 
+'''
 class PostLike(models.Model):
     posts = models.ForeignKey(Post, on_delete = models.CASCADE)
     users = models.ForeignKey(User, on_delete = models.CASCADE)
 
     class Meta:
         db_table = 'posts_likes'
+'''
 
 class Hashtag(models.Model):
     name  = models.CharField(max_length = 50)
