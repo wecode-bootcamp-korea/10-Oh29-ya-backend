@@ -50,3 +50,6 @@ class PostHashtag(models.Model):
 
     class Meta():
         db_table = 'posts_hashtags'
+
+    def __str__(self):
+        return self.posts.content
