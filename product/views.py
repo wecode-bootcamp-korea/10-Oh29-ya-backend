@@ -6,16 +6,25 @@ import os
 import requests
 import sys
 
-from django.http import JsonResponse
-from django.core.validators import validate_email, RegexValidator
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.views import View
+from django.http            import JsonResponse
+from django.core.validators import (
+    validate_email,
+    RegexValidator
+)
+from django.core.exceptions import (
+    ValidationError,
+    ObjectDoesNotExist
+)
+from django.views           import View
 
-from my_settings import SECRET_KEY, ALGORITHM
-
+from my_settings            import (
+    SECRET_KEY,
+    ALGORITHM
+)
 from .models import *
 
 class ProductView(View):
+    # get메소드를 사용하고 싶지만 프론트에서 get으로 데이터 주는 방법을 몰라 임시방편으로 post 로 바꿈 
     def post(self, request):
         data   = json.loads(request.body)
         product=Product.objects
@@ -36,12 +45,20 @@ class ProductView(View):
 class LikeView(View):
     def post(self, request):
         data    = json.loads(request.body)
+        product=Product.objects.get(id=data["product"])
         try:
-            LikeProduct(
-                product=Product.objects.get(id=data["product"]),
-                user=User.objects.get(id=data["user"])
-            ).save()
-            return JsonResponse({'message':'SUCCESS'},status=200)
+            if LikeProduct.objects.filter(user=data['user'],product=data['product']).exists():
+               LikeProduct.objects.get(user=data["user"],product=data['product']).delete()
+               product.like_num-=1
+               product.save()
+            else:
+                LikeProduct(
+                    product=product,
+                    user=User.objects.get(id=data["user"])
+                ).save()
+                product.like_num+=1
+                product.save()
+            return JsonResponse({'like_num':product.like_num},status=200)
         except ValueError:
             return JsonResponse({'message':'WRONG_VALUE'},status=400)    
         except KeyError:

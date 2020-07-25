@@ -75,6 +75,7 @@ class Product(models.Model):
     category        = models.ForeignKey('Category',on_delete=models.SET_NULL,null=True)
     subcategory     = models.ForeignKey('Subcategory',on_delete=models.SET_NULL,null=True)
     detail          = models.ForeignKey('Detail',on_delete=models.SET_NULL,null=True)
+    like_num        = models.IntegerField(default=0)
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 
