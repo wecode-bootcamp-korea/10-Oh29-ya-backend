@@ -19,7 +19,8 @@ class PostView(View):
                 center_table_list = post.posthashtag_set.values()
                 hashtag_list      = [post.hashtag_set.get(id=obj['hashtag_id']).name for obj in center_table_list]
                 post_dic = {
-                    'thumbnail_image' : f'http://{post.thumbnail_image}',
+                    'id'              : post.id,
+                    'thumbnail_image' : f'http   : //{post.thumbnail_image}',
                     'staff_logo'      : f'http://{staff_obj.logo_url}',
                     'staff_name'      : staff_obj.name,
                     'official_check'  : staff_obj.is_official,
