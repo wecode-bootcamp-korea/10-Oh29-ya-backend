@@ -60,11 +60,6 @@ class  BrandCategory(models.Model):
     class Meta:
         db_table    = 'brands_categories'
     
-    
-
-
-
-
 class Product(models.Model):
     name            = models.CharField(max_length = 250, unique=True)
     price           = models.DecimalField(max_digits=10, decimal_places=2)
@@ -92,38 +87,16 @@ class Image(models.Model):
     class Meta:
         db_table = 'images'
 
-class UserOrder(models.Model):
-    user                = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    order_time          = models.DateTimeField(auto_now_add=True)
-    delivery_address    = models.CharField(max_length = 250)
-    order_status        = models.ForeignKey('OrderStatus',on_delete=models.SET_NULL,null=True)
-    time_paid           = models.DateTimeField(null=True)
-    time_canceled       = models.DateTimeField(null=True)
-    time_completed      = models.DateTimeField(null=True)
-    time_snet           = models.DateTimeField(null=True)
-    time_delivered      = models.DateTimeField(null=True)
-    total_price         = models.DecimalField(max_digits=10, decimal_places=2)
-    discount            = models.DecimalField(max_digits=10, decimal_places=2)
-    final_price         = models.DecimalField(max_digits=10, decimal_places=2)
-    active              = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = 'users_orders'
-
 class SpecialOrder(models.Model):
-    text            = models.TextField()
-    image           = models.URLField(max_length=2000)
-    product         = models.ForeignKey(Product,on_delete=models.SET_NULL,null=True)
-    end             = models.DateTimeField(null=True)
+    title               = models.CharField(max_length = 250, unique=True)
+    subtitle            = models.CharField(max_length = 250, unique=True)
+    image               = models.URLField(max_length=2000)
+    background_image    = models.URLField(max_length=2000)
+    product             = models.OneToOneField(Product,on_delete=models.SET_NULL,null=True)
+    time                = models.CharField(max_length = 250, unique=True)
 
     class Meta:
-        db_table = 'specialorders'
-
-class OrderStatus(models.Model):
-    status_name     = models.CharField(max_length=250)
-
-    class Meta:
-        db_table    = 'order_status'
+        db_table = 'special_orders'
 
 class LikeProduct(models.Model):
     user            = models.ForeignKey(User,on_delete=models.CASCADE,null=True)
