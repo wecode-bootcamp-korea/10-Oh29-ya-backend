@@ -25,28 +25,24 @@ from .models                        import User
 
 class SignUpView(View):
     def post(self, request):
-        data                = json.loads(request.body)
+        data = json.loads(request.body)
         try:
             validate_email(data['email'])
-
             if User.objects.filter(email=data["email"]).exists():
                 return JsonResponse({'message':'EXISTS_EMAIL'}, status = 400)
-
             user = User.objects.create(
                 email       = data["email"],
-                password    = bcrypt.hashpw(data['password'].encode('utf-8'),bcrypt.gensalt()),
+                password    = bcrypt.hashpw(data['password'].encode('utf-8'),bcrypt.gensalt()).decode('utf-8'),
                 is_active   = False
             )
-
             current_site = get_current_site(request)
             domain       = current_site.domain
             uid64        = urlsafe_base64_encode(force_bytes(user.pk))
             token        = account_activation_token.make_token(user)
             message_data = message(domain, uid64, token)
-
-            mail_title  = "이메일 인증을 완료해주세요."
-            mail_to     = data["email"]
-            email       = EmailMessage(mail_title, message_data, to = [mail_to])
+            mail_title   = "이메일 인증을 완료해주세요."
+            mail_to      = data["email"]
+            email        = EmailMessage(mail_title, message_data, to = [mail_to])
             email.send()
             
             return JsonResponse({"message":"SUCCESS"},status = 200)
@@ -85,9 +81,7 @@ class Activate(View):
             if account_activation_token.check_token(user, token):
                 user.is_active = True
                 user.save()
-
                 return redirect(EMAIL['REDIRECT_PAGE'])
-            
             return JsonResponse({"message":"ALREADY_AUTH_COMPLETED"}, status=400)
 
         except ValidationError:
