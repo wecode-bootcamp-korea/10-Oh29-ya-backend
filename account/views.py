@@ -6,8 +6,6 @@ import os
 import requests
 import sys
 
-
-
 from django.http                    import JsonResponse, HttpResponse
 from django.core.validators         import validate_email, RegexValidator
 from django.core.exceptions         import ValidationError
@@ -16,17 +14,14 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http              import urlsafe_base64_decode, urlsafe_base64_encode
 from django.core.mail               import EmailMessage
 from django.utils.encoding          import force_bytes, force_text
-from django.views           import View
+from django.views                   import View
 
+from my_settings                    import  SECRET_KEY, EMAIL, ALGORITHM
 
-
-
-from my_settings import  SECRET_KEY, EMAIL, ALGORITHM
-
-from .text          import message
-from account.utils  import login_decorator
-from .tokens    import account_activation_token
-from .models import User
+from .text                          import message
+from account.utils                  import login_decorator
+from .tokens                        import account_activation_token
+from .models                        import User
 
 class SignUpView(View):
     def post(self, request):
