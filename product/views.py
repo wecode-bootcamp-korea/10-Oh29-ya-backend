@@ -96,12 +96,10 @@ class LikeView(View):
             return JsonResponse({'message':"VALUEERROR"}, status = 400)
 
 class ProductView(View):
-    def get(self, request): 
-        data            = {}
-        data["product"] = request.GET.get("product")
+    def get(self, request, product_id): 
         user            = detoken(request)
         try:
-            product = Product.objects.prefetch_related('image_set').select_related('category').select_related('brand').select_related('subcategory').select_related('detail').get(id=data["product"])
+            product = Product.objects.prefetch_related('image_set').select_related('category').select_related('brand').select_related('subcategory').select_related('detail').get(id=product_id)
             product_data = {
                 'id'                : product.id,
                 'name'              : product.name,
@@ -120,7 +118,7 @@ class ProductView(View):
                 'user_like_pressed' : False
             }
             if user:
-                product_data['user_like_pressed'] = (True if LikeProduct.objects.filter(user=User.objects.get(id=user.id),product=Product.objects.get(id=data['product'])).exists() else False)
+                product_data['user_like_pressed'] = (True if LikeProduct.objects.filter(user=User.objects.get(id=user.id),product=Product.objects.get(id=product_id)).exists() else False)
             return JsonResponse({'data':product_data}, status =200)
         except ObjectDoesNotExist:
             return JsonResponse({'message':"DOES_NOT_EXIST"}, status = 400)

@@ -9,8 +9,9 @@ from .models import (
 )
 
 class PostView(View):
-    def get(self, request):
+    def post(self, request):
         try:
+            data = json.loads(request.body)
             post_list = Post.objects.select_related('staff')
             data_list = [{
                 'id'              : post.id,
