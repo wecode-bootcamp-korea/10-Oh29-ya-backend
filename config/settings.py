@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'account',
     'sns',
-    'product'
+    'product',
+    'mypage'
 ]
 
 MIDDLEWARE = [
