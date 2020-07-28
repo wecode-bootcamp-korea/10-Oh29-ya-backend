@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'account'
 ]
 
 MIDDLEWARE = [
@@ -126,3 +127,15 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+EMAIL_HOST = my_settings.EMAIL['EMAIL_HOST']
+
+EMAIL_PORT =  my_settings.EMAIL['EMAIL_PORT']
+
+EMAIL_HOST_USER =  my_settings.EMAIL['EMAIL_HOST_USER']
+
+EMAIL_HOST_PASSWORD =  my_settings.EMAIL['EMAIL_HOST_PASSWORD']
+
+EMAIL_USE_TLS =  my_settings.EMAIL['EMAIL_USE_TLS']
+
+SERVER_EMAIL    = my_settings.EMAIL['SERVER_EMAIL']
