@@ -28,11 +28,13 @@ from product.models import (
     LikeProduct
 )
 from account.models import User
+from account.utils  import login_decorator
 
 class HeartProductView(View):
-    def post(self, request):
-        data    = json.loads(request.body)
-        products = LikeProduct.objects.select_related('user').select_related('product').filter(user_id=data["user"])
+    @login_decorator
+    def get(self, request):
+        user        = request.user
+        products    = LikeProduct.objects.select_related('user').select_related('product').filter(user_id=user)
         productList=[
             {
                 'id'            : word.product.id,

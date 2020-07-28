@@ -1,8 +1,5 @@
-from django.db import models
-
+from django.db      import models
 from account.models import User
-
-
 
 class Brand(models.Model):
     name                = models.CharField(max_length = 50)
@@ -44,7 +41,6 @@ class Detail(models.Model):
 
     def __str__(self):
         return self.name
-    
 
 class CategorySubcategory(models.Model):
     category        = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)

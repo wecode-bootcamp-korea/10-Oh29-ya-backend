@@ -13,6 +13,8 @@ from django.views           import View
 
 from my_settings import SECRET_KEY, ALGORITHM
 
+from account.utils  import login_decorator
+
 from .models import User
 
 class SignUpView(View):
@@ -48,7 +50,7 @@ class SignInView(View):
             if User.objects.filter(email=data['email']).exists():
                 user = User.objects.get(email=data['email'])
                 if bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
-                    token = jwt.encode({'user_id':user.id},SECRET_KEY, algorithm=ALGORITHM).decode('utf-8')
+                    token = jwt.encode({'user':user.id},SECRET_KEY, algorithm=ALGORITHM).decode('utf-8')
                     return JsonResponse({'token':token},status=200)
                 return JsonResponse({'message':'WRONG_EMAIL_PASSWORD'},status=400)
             return JsonResponse({'message':'WRONG_EMAIL_PASSWORD'},status=400)

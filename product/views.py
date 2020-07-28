@@ -5,7 +5,6 @@ import jwt
 import os
 import requests
 import sys
-
 from django.http            import JsonResponse
 from django.core.validators import (
     validate_email,
@@ -16,7 +15,6 @@ from django.core.exceptions import (
     ObjectDoesNotExist
 )
 from django.views           import View
-
 from my_settings            import (
     SECRET_KEY,
     ALGORITHM
@@ -31,59 +29,71 @@ from .models import (
     LikeProduct,
     SpecialOrder
 )
-from account.models import User
+from account.models         import User
+from account.utils          import (
+    login_decorator,
+    detoken
+)
+
+
 
 class CategoryView(View):
-    # get메소드를 사용하고 싶지만 프론트에서 get으로 데이터 주는 방법을 몰라 임시방편으로 post 로 바꿈 
-    def post(self, request):
-        data   = json.loads(request.body)
-        product=Product.objects
-        products = product.filter(category=Category.objects.get(name=data["category"]),subcategory=Subcategory.objects.get(name=data["subcategory"]) )
-        productList=[
-            {
-                'id'            : word.id,
-                'name'          : word.name,
-                'price'         : word.price,
-                'discount_rate' : word.discount_rate,
-                'discount_price': word.discount_price,
-                'brand'         : word.brand.name,
-                'image'         : [image.image for image in Image.objects.filter(product_id=word.id)],
-                'like_num'      : word.like_num,
-                'user_like_pressed' : (True if LikeProduct.objects.filter(user=User.objects.get(id=data['user']),product=Product.objects.get(id=word.id)).exists() else False) 
-            } for word in products   
-        ]    
-        return JsonResponse({"data":productList} ,status=200)
+    def get(self, request):
+        try:
+            data                = {}
+            user                = detoken(request)
+            data["category"]    = request.GET.get("category",None)
+            data["subcategory"] = request.GET.get("subcategory",None)
+            product             = Product.objects
+            products            = product.filter(category=Category.objects.get(name=data["category"]),subcategory=Subcategory.objects.get(name=data["subcategory"]))
+            productList=[
+                {
+                    'id'                : word.id,
+                    'name'              : word.name,
+                    'price'             : word.price,
+                    'discount_rate'     : word.discount_rate,
+                    'discount_price'    : word.discount_price,
+                    'brand'             : word.brand.name,
+                    'image'             : [image.image for image in Image.objects.filter(product_id = word.id)],
+                    'like_num'          : word.like_num,
+                    'user_like_pressed' : False
+                } for word in products   
+            ]
+            if user:
+                for  temp in productList:
+                    temp['user_like_pressed'] = (True if LikeProduct.objects.filter(user = User.objects.get(id = user.id),product = Product.objects.get(id = temp['id'])).exists() else False)   
+            return JsonResponse({"data":productList} , status = 200)
+        except Exception as e:
+            return JsonResponse({"message": e} , status = 400)
 
 class LikeView(View):
+    @login_decorator
     def patch(self, request):  
         data    = json.loads(request.body)
-        product = Product.objects.get(id=data["product"])
+        user    = request.user
+        product = Product.objects.get(id = data["product"])
         try:
-            if LikeProduct.objects.filter(user=data['user'],product=data['product']).exists():
-               LikeProduct.objects.get(user=data["user"],product=data['product']).delete()
+            if LikeProduct.objects.filter(user = user.id, product = data['product']).exists():
+               LikeProduct.objects.get(user = user.id, product = data['product']).delete()
                product.like_num-=1
                product.save()
             else:
                 LikeProduct(
-                    product=product,
-                    user=User.objects.get(id=data["user"])
+                    product = product,
+                    user    = User.objects.get(id = user.id)
                 ).save()
-                product.like_num+=1
+                product.like_num += 1
                 product.save()
-            return JsonResponse({'like_num':product.like_num},status=200)
-        except ValueError:
-            return JsonResponse({'message':'WRONG_VALUE'},status=400)    
-        except KeyError:
-            return JsonResponse({'message':'INVALID_KEYS'},status=400)
-        except ObjectDoesNotExist:
-            return JsonResponse({'message':'DONT_EXIST'},status=401)
+            return JsonResponse({'like_num':product.like_num}, status = 200)
+        except Exception as e:
+            return JsonResponse({'message':e}, status = 400)    
 
 class ProductView(View):
-    def post(self, request): #나중에 겟으로
-        data    = json.loads(request.body)
-        
-        # try:
-        if Product.objects.filter(id=data["product"]).exists():
+    def get(self, request): 
+        data            = {}
+        data["product"] = request.GET.get("product")
+        user            = detoken(request)
+        try:
             product = Product.objects.prefetch_related('image_set').select_related('category').select_related('brand').select_related('subcategory').select_related('detail').get(id=data["product"])
             product_data = {
                 'id'                : product.id,
@@ -100,29 +110,34 @@ class ProductView(View):
                 'image'             : [image.image for image in product.image_set.all()],
                 'like_num'          : product.like_num,
                 'delivery_fee'      : product.delivery_fee,
-                'user_like_pressed' : (True if LikeProduct.objects.filter(user=User.objects.get(id=data['user']),product=Product.objects.get(id=data['product'])).exists() else False)
+                'user_like_pressed' : False
             }
-            return JsonResponse({'data':product_data},status=200)
-        else:
-            return JsonResponse({'message':'INVALID_PRODUCT_ID'},status=400)
-        # except:
-        #     return JsonResponse({'message':'BAD_REQUEST'},status=400)
+            if user:
+                product_data['user_like_pressed'] = (True if LikeProduct.objects.filter(user=User.objects.get(id=user.id),product=Product.objects.get(id=data['product'])).exists() else False)
+            return JsonResponse({'data':product_data}, status =200)
+        except Exception as e:
+            return JsonResponse({'message':e}, status = 400)
 
 class SpecialOrderView(View):
     def get(self, request):
-        special_orders = SpecialOrder.objects.select_related('product__brand')
-        productList=[
-            {
-                'title'         : word.title,
-                'subtitle'      : word.subtitle,
-                'image'         : word.image,
-                'time'          : word.time,
-                'name'          : word.product.name,
-                'price'         : word.product.price,
-                'discount_rate' : word.product.discount_rate,
-                'discount_price': word.product.discount_price,
-                'brand'         : word.product.brand.name,
-                'like_num'      : word.product.like_num 
-            } for word in special_orders   
-        ]    
-        return JsonResponse({"data":productList} ,status=200)
+        try:
+            special_orders = SpecialOrder.objects.select_related('product__brand')
+            productList=[
+                {
+                    'title'         : word.title,
+                    'subtitle'      : word.subtitle,
+                    'image'         : word.image,
+                    'start'         : word.time.split('~')[0].replace('.','/').rstrip(),
+                    'end'           : word.time.split('~')[1].replace('.','/'),
+                    'name'          : word.product.name,
+                    'price'         : word.product.price,
+                    'product_id'    : word.product.id,
+                    'discount_rate' : word.product.discount_rate,
+                    'discount_price': word.product.discount_price,
+                    'brand'         : word.product.brand.name,
+                    'like_num'      : word.product.like_num 
+                } for word in special_orders   
+            ]    
+            return JsonResponse({"data":productList} , status = 200)
+        except Exception as e:
+            return JsonResponse({'message':e}, status = 400)
