@@ -38,9 +38,10 @@ class PostView(View):
 
             if user:
                 for tmp in data_list:
-                    tmp['user_likes_pressed'] =
-                    (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id,
-                                                     post_id=Post.objects.get(id=tmp['post_id']).id).exists() else False)
+                    tmp['user_likes_pressed'] = (
+                        True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id,
+                                                        post_id=Post.objects.get(id=tmp['post_id']).id).exists() else False
+                    )
             return JsonResponse({'data':data_list}, status = 200)
         except  Exception as message:
             return JsonResponse({'message':message}, status = 401)
