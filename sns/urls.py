@@ -7,5 +7,5 @@ from .views import (
 
 urlpatterns = [
     path('/recommend', PostView.as_view()),
-    path('/recommend/like', LikePostView.as_view()),
+    path('/recommend/like', LikePostView.as_view())
 ]

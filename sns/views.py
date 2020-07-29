@@ -13,7 +13,7 @@ from .models import (
 )
 
 from account.models import User
-from account.utils import (
+from account.utils  import (
     login_decorator,
     detoken
 )
@@ -23,6 +23,7 @@ class PostView(View):
         try:
             user      = detoken(request)
             post_list = Post.objects.select_related('staff')
+
             data_list = [{
                 'post_id'            : post.id,
                 'thumbnail_image'    : f'http://{post.thumbnail_image}',
@@ -34,9 +35,12 @@ class PostView(View):
                 'like_num'           : post.like_num,
                 'user_likes_pressed' : False
             } for post in post_list]
+
             if user:
                 for tmp in data_list:
-                    tmp['user_likes_pressed'] = (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id, post_id=Post.objects.get(id=tmp['post_id']).id).exists() else False)
+                    tmp['user_likes_pressed'] =
+                    (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id,
+                                                     post_id=Post.objects.get(id=tmp['post_id']).id).exists() else False)
             return JsonResponse({'data':data_list}, status = 200)
         except  Exception as message:
             return JsonResponse({'message':message}, status = 401)
@@ -54,7 +58,9 @@ class LikePostView(View):
                 post.save()
                 data_list = {
                     'like_num' : post.like_num,
-                    'user_likes_pressed' : (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id, post_id=Post.objects.get(id=post.id).id).exists() else False)
+                    'user_likes_pressed' :
+                    (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id,
+                                                     post_id=Post.objects.get(id=post.id).id).exists() else False)
                 }
             else:
                 LikePost(
@@ -65,7 +71,9 @@ class LikePostView(View):
                 post.save()
                 data_list = {
                     'like_num' : post.like_num,
-                    'user_likes_pressed' : (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id, post_id=Post.objects.get(id=post.id).id).exists() else False)
+                    'user_likes_pressed' :
+                    (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id,
+                                                     post_id=Post.objects.get(id=post.id).id).exists() else False)
                 }
             return JsonResponse({'data':data_list}, status = 200)
         except Exception as e:
