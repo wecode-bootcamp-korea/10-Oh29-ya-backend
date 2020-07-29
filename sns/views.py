@@ -20,14 +20,16 @@ class PostView(View):
             data = json.loads(request.body)
             post_list = Post.objects.select_related('staff')
             data_list = [{
-                'id'              : post.id,
-                'thumbnail_image' : f'http://{post.thumbnail_image}',
-                'staff_logo'      : f'http://{post.staff.logo_url}',
-                'staff_name'      : post.staff.name,
-                'official_check'  : post.staff.is_official,
-                'content'         : post.content,
-                'hashtag'         : [post.hashtag_set.get(id=obj['hashtag_id']).name for obj in post.posthashtag_set.values()]
-                } for post in post_list]
+                'id'                 : post.id,
+                'thumbnail_image'    : f'http://{post.thumbnail_image}',
+                'staff_logo'         : f'http ://{post.staff.logo_url}',
+                'staff_name'         : post.staff.name,
+                'official_check'     : post.staff.is_official,
+                'content'            : post.content,
+                'hashtag'            : [post.hashtag_set.get(id=obj['hashtag_id']).name for obj in post.posthashtag_set.values()],
+                'like_num'           : post.like_num,
+                'user_likes_pressed' : (True if LikePost.objects.filter(user_id=User.objects.get(id=data['user']).id, post_id=Post.objects.get(id=post.id).id).exists() else False)
+            } for post in post_list]
             return JsonResponse({'data':data_list}, status = 200)
         except  Exception as message:
             return JsonResponse({'message':message}, status = 401)

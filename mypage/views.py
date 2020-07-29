@@ -1,10 +1,4 @@
-import bcrypt
-import hashlib
-import json
-import jwt
-import os
-import requests
-import sys
+import bcrypt, hashlib, json, jwt, os, requests, sys
 
 from django.http            import JsonResponse
 from django.core.validators import (
@@ -15,12 +9,13 @@ from django.core.exceptions import (
     ValidationError,
     ObjectDoesNotExist
 )
-from django.views           import View
 
-from my_settings            import (
+from django.views import View
+from my_settings  import (
     SECRET_KEY,
     ALGORITHM
 )
+
 from product.models import (
     Brand,
     Product,
@@ -44,18 +39,16 @@ class HeartProductView(View):
     def get(self, request):
             user        = request.user
             products    = LikeProduct.objects.select_related('user').select_related('product').filter(user_id=user)
-            productList=[
-                {
-                    'id'            : word.product.id,
-                    'name'          : word.product.name,
-                    'price'         : word.product.price,
-                    'discount_rate' : word.product.discount_rate,
-                    'discount_price': word.product.discount_price,
-                    'brand'         : word.product.brand.name,
-                    'image'         : [image.image for image in Image.objects.filter(product_id=word.product.id)],
-                    'like_num'      : word.product.like_num 
-                } for word in products   
-            ]    
+            productList=[{
+                'id'            : word.product.id,
+                'name'          : word.product.name,
+                'price'         : word.product.price,
+                'discount_rate' : word.product.discount_rate,
+                'discount_price': word.product.discount_price,
+                'brand'         : word.product.brand.name,
+                'image'         : [image.image for image in Image.objects.filter(product_id=word.product.id)],
+                'like_num'      : word.product.like_num
+            } for word in products]
             return JsonResponse({"data":productList} ,status=200)
 
 class HeartPostView(View):

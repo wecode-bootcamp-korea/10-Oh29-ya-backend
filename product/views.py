@@ -1,16 +1,7 @@
-import (
-    bcrypt,
-    hashlib,
-    json,
-    jwt,
-    os,
-    requests,
-    sys
-)
+import bcrypt, hashlib, json, jwt, os, requests, sys
 
-from django.http  import JsonResponse
-from django.views import View
-
+from django.http            import JsonResponse
+from django.views           import View
 from django.core.validators import (
     validate_email,
     RegexValidator
@@ -38,8 +29,7 @@ from .models import (
 )
 
 from account.models import User
-
-from account.utils import (
+from account.utils  import (
     login_decorator,
     detoken
 )
