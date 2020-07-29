@@ -1,10 +1,4 @@
-import bcrypt
-import hashlib
-import json
-import jwt
-import os
-import requests
-import sys
+import bcrypt, hashlib, json, jwt, os, requests, sys
 
 from django.http                    import JsonResponse, HttpResponse
 from django.core.validators         import validate_email, RegexValidator
@@ -16,12 +10,11 @@ from django.core.mail               import EmailMessage
 from django.utils.encoding          import force_bytes, force_text
 from django.views                   import View
 
-from my_settings                    import  SECRET_KEY, EMAIL, ALGORITHM
-
-from .text                          import message
-from account.utils                  import login_decorator
-from .tokens                        import account_activation_token
-from .models                        import User
+from my_settings   import SECRET_KEY, EMAIL, ALGORITHM
+from .text         import message
+from account.utils import login_decorator
+from .tokens       import account_activation_token
+from .models       import User
 
 class SignUpView(View):
     def post(self, request):
@@ -77,7 +70,6 @@ class Activate(View):
         try:
             uid  = force_text(urlsafe_base64_decode(uid64))
             user = User.objects.get(pk=uid)
-
             if account_activation_token.check_token(user, token):
                 user.is_active = True
                 user.save()
