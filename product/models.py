@@ -99,4 +99,4 @@ class LikeProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
 
     class Meta:
-        db_table = 'like_product'
+        db_table = 'likes_products'
