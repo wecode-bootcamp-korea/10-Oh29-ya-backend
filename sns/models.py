@@ -18,8 +18,8 @@ class Post(models.Model):
     content         = models.TextField()
     modal_video     = models.URLField(max_length = 2000, null = True)
     staff           = models.ForeignKey(Staff, on_delete = models.CASCADE)
-    like_num = models.IntegerField(default = 0)
-    like = models.ManyToManyField(User, through = 'LikePost')
+    like_num        = models.IntegerField(default = 0)
+    like            = models.ManyToManyField(User, through = 'LikePost')
 
     class Meta:
         db_table = 'posts'

@@ -97,9 +97,9 @@ class LikeView(View):
 
 class ProductView(View):
     def get(self, request, product_id): 
-        user            = detoken(request)
+        user = detoken(request)
         try:
-            product = Product.objects.prefetch_related('image_set').select_related('category').select_related('brand').select_related('subcategory').select_related('detail').get(id=product_id)
+            product = Product.objects.prefetch_related('image_set').select_related('brand', 'category', 'subcategory', 'detail').get(id=product_id)
             product_data = {
                 'id'                : product.id,
                 'name'              : product.name,
@@ -125,7 +125,7 @@ class ProductView(View):
         except json.decoder.JSONDecodeError:
             return JsonResponse({'message':"JSON_ERROR"}, status = 400)
         except ValueError:
-            return JsonResponse({'message':"VALUEERROR"}, status = 400)
+            return JsonResponse({'message':"VALUE_ERROR"}, status = 400)
 
 class SpecialOrderView(View):
     def get(self, request):
