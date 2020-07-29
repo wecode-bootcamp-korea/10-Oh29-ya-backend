@@ -20,7 +20,8 @@ class PostView(View):
             data = json.loads(request.body)
             post_list = Post.objects.select_related('staff')
             data_list = [{
-                'id'                 : post.id,
+                'user_id'            : data['user'],
+                'post_id'            : post.id,
                 'thumbnail_image'    : f'http://{post.thumbnail_image}',
                 'staff_logo'         : f'http://{post.staff.logo_url}',
                 'staff_name'         : post.staff.name,
@@ -38,8 +39,6 @@ class LikePostView(View):
     def patch(self, request):
         try:
             data = json.loads(request.body)
-            print(data['user'])
-            print(data['post'])
             post = Post.objects.get(id=data['post'])
             if LikePost.objects.filter(user_id=data['user'], post_id=data['post']).exists():
                 LikePost.objects.get(user_id=data['user'], post_id=data['post']).delete()
