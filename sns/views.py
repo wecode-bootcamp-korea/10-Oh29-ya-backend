@@ -52,6 +52,10 @@ class LikePostView(View):
                 LikePost.objects.get(user_id=user.id, post_id=data['post']).delete()
                 post.like_num = len(list(LikePost.objects.filter(post_id=Post.objects.get(id=post.id))))
                 post.save()
+                data_list = {
+                    'like_num' : post.like_num,
+                    'user_likes_pressed' : (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id, post_id=Post.objects.get(id=post.id).id).exists() else False)
+                }
             else:
                 LikePost(
                     post_id = post.id,
@@ -59,6 +63,10 @@ class LikePostView(View):
                 ).save()
                 post.like_num = len(list(LikePost.objects.filter(post_id=Post.objects.get(id=post.id))))
                 post.save()
-            return JsonResponse({'like_num':post.like_num}, status = 200)
+                data_list = {
+                    'like_num' : post.like_num,
+                    'user_likes_pressed' : (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id, post_id=Post.objects.get(id=post.id).id).exists() else False)
+                }
+            return JsonResponse({'data':data_list}, status = 200)
         except Exception as e:
             return JsonResponse({'message':e}, status = 401)
