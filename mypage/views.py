@@ -74,7 +74,7 @@ class HeartPostView(View):
                 'hashtag'            : [inter_obj.hashtag.name for inter_obj in post.post.posthashtag_set.all()],
                 'like_num'           : post.post.like_num,
                 'user_likes_pressed' : (True if LikePost.objects.filter(user_id=User.objects.get(id=data['user']).id,
-                                                                        post_id=Post.objects.get(id=post.post.id).id).exists() else False)
+post_id=Post.objects.get(id=post.post.id).id).exists() else False)
             } for post in user_likes]
             return JsonResponse({'my_heart_list':my_heart_list}, status = 200)
         except Exception as e:
