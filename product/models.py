@@ -59,9 +59,9 @@ class  BrandCategory(models.Model):
 class Product(models.Model):
     name            = models.CharField(max_length = 250, unique=True)
     price           = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_rate   = models.IntegerField(default=0)
-    discount_price  = models.DecimalField(max_digits=10, decimal_places=2)
-    delivery_fee    = models.IntegerField(default=0)
+    discount_rate   = models.IntegerField(default=0,null=True)
+    discount_price  = models.DecimalField(max_digits=10, decimal_places=2,null=True)
+    delivery_fee    = models.IntegerField(default=0,null=True)
     brand           = models.ForeignKey('Brand',on_delete=models.SET_NULL,null=True)
     category        = models.ForeignKey('Category',on_delete=models.SET_NULL,null=True)
     subcategory     = models.ForeignKey('Subcategory',on_delete=models.SET_NULL,null=True)

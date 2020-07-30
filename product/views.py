@@ -45,7 +45,7 @@ class CategoryView(View):
             user                = detoken(request)
             data["category"]    = request.GET.get("category",None)
             data["subcategory"] = request.GET.get("subcategory",None)
-            product             = Product.objects
+            product             = Product.objects.select_related('brand').select_related('detail').prefetch_related('image_set')
             products            = product.filter(category=Category.objects.get(name=data["category"]),subcategory=Subcategory.objects.get(name=data["subcategory"]))
             productList=[
                 {
@@ -55,9 +55,11 @@ class CategoryView(View):
                     'discount_rate'     : word.discount_rate,
                     'discount_price'    : word.discount_price,
                     'brand'             : word.brand.name,
-                    'image'             : [image.image for image in Image.objects.filter(product_id = word.id)],
+                    'image'             : Image.objects.filter(product_id = word.id)[0].image,
+                    'detail'            : word.detail.name,
                     'like_num'          : word.like_num,
-                    'user_like_pressed' : False
+                    'user_like_pressed' : False,
+                    'created_at'        : word.created_at
                 } for word in products   
             ]
             if user:
@@ -87,7 +89,9 @@ class LikeView(View):
                 ).save()
                 product.like_num += 1
                 product.save()
-            return JsonResponse({'like_num':product.like_num}, status = 200)
+            pressed     =  (True if LikeProduct.objects.filter(user = User.objects.get(id = user.id),product = Product.objects.get(id = product.id)).exists() else False)
+            like_data   = {"pressed" : pressed , "like_num" : product.like_num} 
+            return JsonResponse({'like_data': like_data}, status = 200)
         except ObjectDoesNotExist:
             return JsonResponse({'message':"DOES_NOT_EXIST"}, status = 400)
         except json.decoder.JSONDecodeError:
@@ -96,12 +100,10 @@ class LikeView(View):
             return JsonResponse({'message':"VALUEERROR"}, status = 400)
 
 class ProductView(View):
-    def get(self, request): 
-        data            = {}
-        data["product"] = request.GET.get("product")
+    def get(self, request, product_id): 
         user            = detoken(request)
         try:
-            product = Product.objects.prefetch_related('image_set').select_related('category').select_related('brand').select_related('subcategory').select_related('detail').get(id=data["product"])
+            product = Product.objects.prefetch_related('image_set').select_related('category').select_related('brand').select_related('subcategory').select_related('detail').get(id=product_id)
             product_data = {
                 'id'                : product.id,
                 'name'              : product.name,
@@ -120,7 +122,7 @@ class ProductView(View):
                 'user_like_pressed' : False
             }
             if user:
-                product_data['user_like_pressed'] = (True if LikeProduct.objects.filter(user=User.objects.get(id=user.id),product=Product.objects.get(id=data['product'])).exists() else False)
+                product_data['user_like_pressed'] = (True if LikeProduct.objects.filter(user=User.objects.get(id=user.id),product=Product.objects.get(id=product_id)).exists() else False)
             return JsonResponse({'data':product_data}, status =200)
         except ObjectDoesNotExist:
             return JsonResponse({'message':"DOES_NOT_EXIST"}, status = 400)
