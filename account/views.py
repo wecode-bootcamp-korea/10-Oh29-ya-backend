@@ -37,8 +37,8 @@ class SignUpView(View):
             mail_to      = data["email"]
             email        = EmailMessage(mail_title, message_data, to = [mail_to])
             email.send()
-
-            return JsonResponse({"message":"SUCCESS"},status = 200)
+            token = jwt.encode({'user':user.id},SECRET_KEY, algorithm=ALGORITHM).decode('utf-8')
+            return JsonResponse({"token":token},status = 200)
         except ValidationError:
             return JsonResponse({"message" : "INVALID_EMAIL_OR_PASSWORD"}, status = 400)
         except KeyError:

@@ -27,7 +27,8 @@ INSTALLED_APPS = [
     'account',
     'sns',
     'product',
-    'mypage'
+    'mypage',
+    'cart'
 ]
 
 MIDDLEWARE = [
