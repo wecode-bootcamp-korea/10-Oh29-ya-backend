@@ -25,9 +25,6 @@ class UserOrder(models.Model):
     class Meta:
         db_table = 'users_orders'
 
-
-
-
 class OrderProduct(models.Model):
     user_order      = models.ForeignKey(UserOrder, on_delete=models.CASCADE,null=True)
     product         = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
@@ -37,7 +34,7 @@ class OrderProduct(models.Model):
         db_table = 'orders_products'
 
 class OrderStatus(models.Model):
-    name     = models.CharField(max_length=250)
+    name = models.CharField(max_length=250)
 
     class Meta:
-        db_table    = 'order_status'
+        db_table = 'order_status'
