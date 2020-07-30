@@ -8,14 +8,7 @@ from .views         import (
 
 urlpatterns = [
     path('', CategoryView.as_view()),
-<<<<<<< HEAD
     path('/like', LikeView.as_view()),
     path('/<int:product_id>', ProductView.as_view()),
     path('/specialorders', SpecialOrderView.as_view())
 ]
-=======
-    path('/like',LikeView.as_view()),
-    path('/<int:product_id>',ProductView.as_view()),
-    path('/specialorders',SpecialOrderView.as_view())
-]
->>>>>>> master
