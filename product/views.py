@@ -41,10 +41,8 @@ class CategoryView(View):
             user                = detoken(request)
             data["category"]    = request.GET.get("category",None)
             data["subcategory"] = request.GET.get("subcategory",None)
-<<<<<<< HEAD
-            product             = Product.objects
-            products            = product.filter(category=Category.objects.get(name=data["category"]),
-                                                 subcategory=Subcategory.objects.get(name=data["subcategory"]))
+            product             = Product.objects.select_related('brand').select_related('detail').prefetch_related('image_set')
+            products            = product.filter(category=Category.objects.get(name=data["category"]), subcategory=Subcategory.objects.get(name=data["subcategory"]))
             productList=[{
                 'id'                : word.id,
                 'name'              : word.name,
@@ -52,34 +50,16 @@ class CategoryView(View):
                 'discount_rate'     : word.discount_rate,
                 'discount_price'    : word.discount_price,
                 'brand'             : word.brand.name,
-                'image'             : [image.image for image in Image.objects.filter(product_id = word.id)],
+                'image'             : Image.objects.filter(product_id = word.id)[0].image,
+                'detail'            : word.detail.name,
                 'like_num'          : word.like_num,
-                'user_like_pressed' : False
+                'user_like_pressed' : False,
+                'created_at'        : word.created_at
             } for word in products]
-=======
-            product             = Product.objects.select_related('brand').select_related('detail').prefetch_related('image_set')
-            products            = product.filter(category=Category.objects.get(name=data["category"]),subcategory=Subcategory.objects.get(name=data["subcategory"]))
-            productList=[
-                {
-                    'id'                : word.id,
-                    'name'              : word.name,
-                    'price'             : word.price,
-                    'discount_rate'     : word.discount_rate,
-                    'discount_price'    : word.discount_price,
-                    'brand'             : word.brand.name,
-                    'image'             : Image.objects.filter(product_id = word.id)[0].image,
-                    'detail'            : word.detail.name,
-                    'like_num'          : word.like_num,
-                    'user_like_pressed' : False,
-                    'created_at'        : word.created_at
-                } for word in products   
-            ]
->>>>>>> master
             if user:
                 for temp in productList:
                     temp['user_like_pressed'] = (
-                        True if LikeProduct.objects.filter(user = User.objects.get(id = user.id),
-                                                           product = Product.objects.get(id = temp['id'])).exists() else False)
+                        True if LikeProduct.objects.filter(user = User.objects.get(id = user.id), product = Product.objects.get(id = temp['id'])).exists() else False)
             return JsonResponse({"data":productList} , status = 200)
         except TypeError:
             return JsonResponse({'message':"TYPE_ERROR"}, status = 400)
@@ -99,9 +79,7 @@ class LikeView(View):
                product.save()
                data_list = {
                    'like_num' : product.like_num,
-                   'user_like_pressed' : (
-                       True if LikeProduct.objects.filter(user_id=User.objects.get(id=user.id).id,
-                                                          product_id=Product.objects.get(id=product.id).id).exists() else False)
+                   'user_like_pressed' : (True if LikeProduct.objects.filter(user_id=User.objects.get(id=user.id).id, product_id=Product.objects.get(id=product.id).id).exists() else False)
                }
             else:
                 LikeProduct(
@@ -110,19 +88,9 @@ class LikeView(View):
                 ).save()
                 product.like_num += 1
                 product.save()
-<<<<<<< HEAD
-                data_list = {
-                    'like_num' : product.like_num,
-                    'user_like_pressed' : (
-                        True if LikeProduct.objects.filter(user_id=User.objects.get(id=user.id).id,
-                                                           product_id=Product.objects.get(id=product.id).id).exists() else False)
-                }
-            return JsonResponse({'data':data_list}, status = 200)
-=======
-            pressed     =  (True if LikeProduct.objects.filter(user = User.objects.get(id = user.id),product = Product.objects.get(id = product.id)).exists() else False)
-            like_data   = {"pressed" : pressed , "like_num" : product.like_num} 
+            pressed   = (True if LikeProduct.objects.filter(user = User.objects.get(id = user.id),product = Product.objects.get(id = product.id)).exists() else False)
+            like_data = {"pressed" : pressed , "like_num" : product.like_num}
             return JsonResponse({'like_data': like_data}, status = 200)
->>>>>>> master
         except ObjectDoesNotExist:
             return JsonResponse({'message':"DOES_NOT_EXIST"}, status = 400)
         except json.decoder.JSONDecodeError:
@@ -131,17 +99,10 @@ class LikeView(View):
             return JsonResponse({'message':"VALUE_ERROR"}, status = 400)
 
 class ProductView(View):
-<<<<<<< HEAD
     def get(self, request, product_id):
         user = detoken(request)
         try:
             product = Product.objects.prefetch_related('image_set').select_related('brand', 'category', 'subcategory', 'detail').get(id=product_id)
-=======
-    def get(self, request, product_id): 
-        user            = detoken(request)
-        try:
-            product = Product.objects.prefetch_related('image_set').select_related('category').select_related('brand').select_related('subcategory').select_related('detail').get(id=product_id)
->>>>>>> master
             product_data = {
                 'id'                : product.id,
                 'name'              : product.name,
