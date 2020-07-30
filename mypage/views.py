@@ -49,7 +49,7 @@ class HeartProductView(View):
                 'brand'              : word.product.brand.name,
                 'image'              : [image.image for image in Image.objects.filter(product_id=word.product.id)],
                 'like_num'           : word.product.like_num,
-                'user_likes_pressed' : (True if LikeProduct.objects.filter(user_id=User.objects.get(id=user.id).id, product_id=Product.objects.get(id=word.product.id).id).exists() else False)
+                'user_likes_pressed' : (True if LikeProduct.objects.filter(user_id=user.id, product_id=word.product.id).exists() else False)
             } for word in products]
             return JsonResponse({"data":productList} ,status=200)
         except Exception as e:
@@ -71,8 +71,8 @@ class HeartPostView(View):
                 'content'            : post.post.content,
                 'hashtag'            : [inter_obj.hashtag.name for inter_obj in post.post.posthashtag_set.all()],
                 'like_num'           : post.post.like_num,
-                'user_likes_pressed' : (True if LikePost.objects.filter(user_id=User.objects.get(id=user.id).id,
-post_id=Post.objects.get(id=post.post.id).id).exists() else False)
+                'user_likes_pressed' : (True if LikePost.objects.filter(user_id=user.id,
+post_id=post.post.id).exists() else False)
             } for post in user_likes]
             return JsonResponse({'my_heart_list':my_heart_list}, status = 200)
         except Exception as e:
