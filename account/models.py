@@ -9,3 +9,10 @@ class User(models.Model):
     class Meta:
         db_table = 'users'
         
+
+class Delivery(models.Model):
+    user                   = models.ForeignKey(User, on_delete=models.CASCADE)
+    address                = models.CharField(max_length = 250, null=True)
+
+    class Meta:
+        db_table = 'deliveries'
