@@ -41,8 +41,8 @@ class CategoryView(View):
             user                = detoken(request)
             data["category"]    = request.GET.get("category",None)
             data["subcategory"] = request.GET.get("subcategory",None)
-            product             = Product.objects.select_related('brand').select_related('detail').prefetch_related('image_set')
-            products            = product.filter(category=Category.objects.get(name=data["category"]), subcategory=Subcategory.objects.get(name=data["subcategory"]))
+            product             = Product.objects.select_related('brand', 'detail').prefetch_related('image_set')
+            products            = product.filter(category__name=data['category'], subcategory__name=data["subcategory"])
             productList=[{
                 'id'                : word.id,
                 'name'              : word.name,
@@ -57,14 +57,13 @@ class CategoryView(View):
                 'created_at'        : word.created_at
             } for word in products]
             if user:
-                for temp in productList:
-                    temp['user_like_pressed'] = (
-                        True if LikeProduct.objects.filter(user = User.objects.get(id = user.id), product = Product.objects.get(id = temp['id'])).exists() else False)
-            return JsonResponse({"data":productList} , status = 200)
+                for product in productList:
+                    product['user_like_pressed'] = (True if LikeProduct.objects.filter(user_id=user.id, product_id=product.id).exists() else False)
+            return JsonResponse({"data":productList}, status=200)
         except TypeError:
-            return JsonResponse({'message':"TYPE_ERROR"}, status = 400)
+            return JsonResponse({'message':"TYPE_ERROR"}, status=400)
         except ObjectDoesNotExist:
-            return JsonResponse({'message':"DOES_NOT_EXIST"}, status = 400)
+            return JsonResponse({'message':"DOES_NOT_EXIST"}, status=400)
 
 class LikeView(View):
     @login_decorator
@@ -79,7 +78,7 @@ class LikeView(View):
                product.save()
                data_list = {
                    'like_num' : product.like_num,
-                   'user_like_pressed' : (True if LikeProduct.objects.filter(user_id=User.objects.get(id=user.id).id, product_id=Product.objects.get(id=product.id).id).exists() else False)
+                   'user_like_pressed' : (True if LikeProduct.objects.filter(user_id=user.id, product_id=product.id).exists() else False)
                }
             else:
                 LikeProduct(
@@ -88,7 +87,7 @@ class LikeView(View):
                 ).save()
                 product.like_num += 1
                 product.save()
-            pressed   = (True if LikeProduct.objects.filter(user = User.objects.get(id = user.id),product = Product.objects.get(id = product.id)).exists() else False)
+            pressed   = (True if LikeProduct.objects.filter(user_id=user.id, product_id=product.id).exists() else False)
             like_data = {"pressed" : pressed , "like_num" : product.like_num}
             return JsonResponse({'like_data': like_data}, status = 200)
         except ObjectDoesNotExist:

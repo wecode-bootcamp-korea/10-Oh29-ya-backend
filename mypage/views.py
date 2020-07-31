@@ -53,14 +53,14 @@ class HeartProductView(View):
             } for word in products]
             return JsonResponse({"data":productList} ,status=200)
         except Exception as e:
-            return JsonResponse({'message':e}, status = 200)
+            return JsonResponse({'message':e}, status = 401)
 
 class HeartPostView(View):
     @login_decorator
     def get(self, request):
         try:
             user       = request.user
-            user_likes = User.objects.prefetch_related('likepost_set').get(id=user.id).likepost_set.all()
+            user_likes = user.likepost_set.all()
             my_heart_list = [{
                 'user_id'            : user.id,
                 'post_id'            : post.post.id,
